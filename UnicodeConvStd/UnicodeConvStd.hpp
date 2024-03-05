@@ -18,13 +18,15 @@
 // std::wstring is used to store UTF-16-encoded text.
 // std::string is used to store UTF-8-encoded text.
 //
+// For input string parameters, string views are used for versatility.
+//
 // The exported functions are:
 //
 //      * Convert from UTF-16 to UTF-8:
-//        std::string ToUtf8(std::wstring const& utf16)
+//        std::string ToUtf8(std::wstring_view utf16)
 //
 //      * Convert from UTF-8 to UTF-16:
-//        std::wstring ToUtf16(std::string const& utf8)
+//        std::wstring ToUtf16(std::string_view utf8)
 //
 // These functions live under the UnicodeConvStd namespace.
 //
@@ -36,7 +38,7 @@
 //
 // The MIT License(MIT)
 //
-// Copyright(c) 2016-2023 by Giovanni Dicanio
+// Copyright(c) 2016-2024 by Giovanni Dicanio
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files(the "Software"), to deal
@@ -70,6 +72,7 @@
 #include <limits>       // std::numeric_limits
 #include <stdexcept>    // std::runtime_error, std::overflow_error
 #include <string>       // std::string, std::wstring
+#include <string_view>  // std::string_view, std::wstring_view
 
 
 //==============================================================================
@@ -146,10 +149,10 @@ inline [[nodiscard]] int SafeToInt(size_t s)
 
 
 //------------------------------------------------------------------------------
-// Convert from UTF-16 std::wstring to UTF-8 std::string.
+// Convert from UTF-16 std::wstring_view to UTF-8 std::string.
 // Signal errors throwing UnicodeConversionException.
 //------------------------------------------------------------------------------
-inline [[nodiscard]] std::string ToUtf8(std::wstring const& utf16)
+inline [[nodiscard]] std::string ToUtf8(std::wstring_view utf16)
 {
     // Special case of empty input string
     if (utf16.empty())
@@ -213,10 +216,10 @@ inline [[nodiscard]] std::string ToUtf8(std::wstring const& utf16)
 
 
 //------------------------------------------------------------------------------
-// Convert from UTF-8 std::string to UTF-16 std::wstring.
+// Convert from UTF-8 std::string_view to UTF-16 std::wstring.
 // Signal errors throwing UnicodeConversionException.
 //------------------------------------------------------------------------------
-inline [[nodiscard]] std::wstring ToUtf16(std::string const& utf8)
+inline [[nodiscard]] std::wstring ToUtf16(std::string_view utf8)
 {
     // Special case of empty input string
     if (utf8.empty())

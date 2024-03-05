@@ -1,6 +1,6 @@
 # UnicodeConvStd
 Convenient easy-to-use and efficient helper functions to convert between Unicode UTF-16 and UTF-8 
-using std::wstring and std::string
+using string views and STL string classes
 
 ---
 
@@ -11,14 +11,16 @@ using C++ Standard Library's `std::wstring` and `std::string` classes and direct
 `std::wstring` is used to store **UTF-16**-encoded text.
 `std::string` is used to store **UTF-8**-encoded text.
 
+For input string parameters, *string views* are used for versatility.
+
 The exported functions are:
 
 ```cpp
     // Convert from UTF-16 to UTF-8
-    std::string ToUtf8(std::wstring const& utf16)
+    std::string ToUtf8(std::wstring_view utf16)
     
     // Convert from UTF-8 to UTF-16
-    std::wstring ToUtf16(std::string const& utf8)
+    std::wstring ToUtf16(std::string_view utf8)
 ```
 
 These functions live under the `UnicodeConvStd` namespace.

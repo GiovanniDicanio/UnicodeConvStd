@@ -34,10 +34,33 @@ void Check(bool condition, const char* description)
 
 void TestEmptyStrings()
 {
-    std::wstring utf16empty;
-    std::string utf8empty = UnicodeConvStd::ToUtf8(utf16empty);
-    _ASSERTE(utf8empty.empty());
-    Check(utf8empty.empty(), "Empty strings");
+    std::wstring utf16Empty;
+    std::string utf8Empty = UnicodeConvStd::ToUtf8(utf16Empty);
+    _ASSERTE(utf8Empty.empty());
+    Check(utf8Empty.empty(), "Empty UTF-16 wstring converted to empty UTF-8 string");
+
+    utf8Empty = UnicodeConvStd::ToUtf8(L"");
+    _ASSERTE(utf8Empty.empty());
+    Check(utf8Empty.empty(), "Empty UTF-16 string literal converted to empty UTF-8 string");
+
+    _ASSERTE(utf8Empty.empty());
+    utf16Empty = UnicodeConvStd::ToUtf16(utf8Empty);
+    _ASSERTE(utf16Empty.empty());
+    Check(utf16Empty.empty(), "Empty UTF-8 string converted to empty UTF-16 wstring");
+
+    utf16Empty = UnicodeConvStd::ToUtf16("");
+    _ASSERTE(utf16Empty.empty());
+    Check(utf16Empty.empty(), "Empty UTF-8 string literal converted to empty UTF-16 wstring");
+}
+
+
+void TestSimpleAsciiStrings()
+{
+    const char* pszOriginal = "Ciao ciao";
+    std::wstring utf16 = UnicodeConvStd::ToUtf16(pszOriginal);
+    std::string utf8 = UnicodeConvStd::ToUtf8(utf16);
+    _ASSERTE(utf8 == pszOriginal);
+    Check(utf8 == pszOriginal, "Simple ASCII string conversions");
 }
 
 
