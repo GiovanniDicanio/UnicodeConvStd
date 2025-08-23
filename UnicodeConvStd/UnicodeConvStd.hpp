@@ -3,40 +3,50 @@
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// Unicode UTF-16/UTF-8 conversion functions for std::wstring and std::string
+//
+//            *** Unicode UTF-16/UTF-8 Conversion Functions ***
+//                    with std::wstring and std::string
 //
 //                  Copyright (C) by Giovanni Dicanio
 //                    <giovanni.dicanio AT gmail.com>
+//
+//
+// Last Update: 2025, August 23
 //
 ////////////////////////////////////////////////////////////////////////////////
 
 
 //------------------------------------------------------------------------------
-// This is a header-only C++ file that implements a couple of functions
+//
+// This is a header-only C++ library that implements a couple of functions
 // to simply and conveniently convert Unicode text between UTF-16 and UTF-8.
 //
 // std::wstring is used to store UTF-16-encoded text.
 // std::string is used to store UTF-8-encoded text.
 //
+// Input arguments use the respective string views:
+//
+// std::wstring_view is used for input UTF-16-encoded text.
+// std::string_view is used for input UTF-8-encoded text.
+//
 // The exported functions are:
 //
 //      * Convert from UTF-16 to UTF-8:
-//        std::string ToUtf8(std::wstring const& utf16)
+//        std::string Utf8FromUtf16(std::wstring_view utf16)
 //
 //      * Convert from UTF-8 to UTF-16:
-//        std::wstring ToUtf16(std::string const& utf8)
+//        std::wstring Utf16FromUtf8(std::string_view utf8)
 //
 // These functions live under the UnicodeConvStd namespace.
 //
 // This code compiles cleanly at warning level 4 (/W4)
 // on both 32-bit and 64-bit builds with Visual Studio 2019 in C++17 mode.
 //
-//
 //------------------------------------------------------------------------------
 //
 // The MIT License(MIT)
 //
-// Copyright(c) 2016-2023 by Giovanni Dicanio
+// Copyright(c) 2016-2025 by Giovanni Dicanio
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files(the "Software"), to deal
@@ -70,13 +80,38 @@
 #include <limits>       // std::numeric_limits
 #include <stdexcept>    // std::runtime_error, std::overflow_error
 #include <string>       // std::string, std::wstring
+#include <string_view>  // std::string_view, std::wstring_view
+
+
+//==============================================================================
+//                              Public Interface
+//==============================================================================
+
+namespace UnicodeConvStd {
+
+
+// Error during Unicode conversion
+class UnicodeConversionException;
+
+
+//------------------------------------------------------------------------------
+// Convert from UTF-16 (std::wstring_view) to UTF-8 (std::string).
+// Signal errors throwing UnicodeConversionException.
+//------------------------------------------------------------------------------
+[[nodiscard]] std::string Utf8FromUtf16(std::wstring_view utf16);
+
+//------------------------------------------------------------------------------
+// Convert from UTF-8 (std::string_view) to UTF-16 (std::wstring).
+// Signal errors throwing UnicodeConversionException.
+//------------------------------------------------------------------------------
+[[nodiscard]] std::wstring Utf16FromUtf8(std::string_view utf8);
+
 
 
 //==============================================================================
 //                              Implementation
 //==============================================================================
 
-namespace UnicodeConvStd {
 
 //------------------------------------------------------------------------------
 // Represents an error during Unicode conversions
@@ -88,8 +123,8 @@ public:
 
     enum class ConversionType
     {
-        FromUtf16ToUtf8,
-        FromUtf8ToUtf16
+        ConversionFromUtf16ToUtf8,
+        ConversionFromUtf8ToUtf16
     };
 
     UnicodeConversionException(DWORD errorCode, ConversionType conversionType, const char* message)
@@ -106,6 +141,7 @@ public:
     {
     }
 
+    // Error code returned by Windows APIs like WideCharToMultiByte or MultiByteToWideChar
     [[nodiscard]] DWORD GetErrorCode() const noexcept
     {
         return m_errorCode;
@@ -122,34 +158,30 @@ private:
 };
 
 
-namespace Details
+namespace details
 {
 
 //------------------------------------------------------------------------------
-// Helper function to safely convert a size_t value to int.
-// If size_t is too large, throws a std::overflow_error.
+// Helper function to safely convert a size_t value to an int.
+// If the input size_t is too large, throws a std::overflow_error.
 //------------------------------------------------------------------------------
-inline [[nodiscard]] int SafeToInt(size_t s)
+inline [[nodiscard]] int SafeIntFromSizet(size_t s)
 {
     using DestinationType = int;
 
     if (s > static_cast<size_t>((std::numeric_limits<DestinationType>::max)()))
     {
         throw std::overflow_error(
-            "Input size is too long: size_t-length doesn't fit into int.");
+            "Input size_t value is too large: size_t-length doesn't fit into an int.");
     }
 
     return static_cast<DestinationType>(s);
 }
 
-} // namespace Details
+} // namespace details
 
 
-//------------------------------------------------------------------------------
-// Convert from UTF-16 std::wstring to UTF-8 std::string.
-// Signal errors throwing UnicodeConversionException.
-//------------------------------------------------------------------------------
-inline [[nodiscard]] std::string ToUtf8(std::wstring const& utf16)
+inline std::string Utf8FromUtf16(std::wstring_view utf16)
 {
     // Special case of empty input string
     if (utf16.empty())
@@ -161,7 +193,7 @@ inline [[nodiscard]] std::string ToUtf8(std::wstring const& utf16)
     // Safely fail if an invalid UTF-16 character sequence is encountered
     constexpr DWORD kFlags = WC_ERR_INVALID_CHARS;
 
-    const int utf16Length = Details::SafeToInt(utf16.length());
+    const int utf16Length = details::SafeIntFromSizet(utf16.length());
 
     // Get the length, in chars, of the resulting UTF-8 string
     const int utf8Length = ::WideCharToMultiByte(
@@ -179,7 +211,7 @@ inline [[nodiscard]] std::string ToUtf8(std::wstring const& utf16)
         const DWORD errorCode = ::GetLastError();
         throw UnicodeConversionException(
             errorCode,
-            UnicodeConversionException::ConversionType::FromUtf16ToUtf8,
+            UnicodeConversionException::ConversionType::ConversionFromUtf16ToUtf8,
             "Can't get result UTF-8 string length (WideCharToMultiByte failed).");
     }
 
@@ -204,7 +236,7 @@ inline [[nodiscard]] std::string ToUtf8(std::wstring const& utf16)
         const DWORD errorCode = ::GetLastError();
         throw UnicodeConversionException(
             errorCode,
-            UnicodeConversionException::ConversionType::FromUtf16ToUtf8,
+            UnicodeConversionException::ConversionType::ConversionFromUtf16ToUtf8,
             "Can't convert from UTF-16 to UTF-8 string (WideCharToMultiByte failed).");
     }
 
@@ -212,11 +244,7 @@ inline [[nodiscard]] std::string ToUtf8(std::wstring const& utf16)
 }
 
 
-//------------------------------------------------------------------------------
-// Convert from UTF-8 std::string to UTF-16 std::wstring.
-// Signal errors throwing UnicodeConversionException.
-//------------------------------------------------------------------------------
-inline [[nodiscard]] std::wstring ToUtf16(std::string const& utf8)
+inline std::wstring Utf16FromUtf8(std::string_view utf8)
 {
     // Special case of empty input string
     if (utf8.empty())
@@ -228,7 +256,7 @@ inline [[nodiscard]] std::wstring ToUtf16(std::string const& utf8)
     // Safely fail if an invalid UTF-8 character sequence is encountered
     constexpr DWORD kFlags = MB_ERR_INVALID_CHARS;
 
-    const int utf8Length = Details::SafeToInt(utf8.length());
+    const int utf8Length = details::SafeIntFromSizet(utf8.length());
 
     // Get the size of the destination UTF-16 string
     const int utf16Length = ::MultiByteToWideChar(
@@ -245,7 +273,7 @@ inline [[nodiscard]] std::wstring ToUtf16(std::string const& utf8)
         const DWORD errorCode = ::GetLastError();
         throw UnicodeConversionException(
             errorCode,
-            UnicodeConversionException::ConversionType::FromUtf8ToUtf16,
+            UnicodeConversionException::ConversionType::ConversionFromUtf8ToUtf16,
             "Can't get result UTF-16 string length (MultiByteToWideChar failed).");
     }
 
@@ -269,12 +297,13 @@ inline [[nodiscard]] std::wstring ToUtf16(std::string const& utf8)
         const DWORD errorCode = ::GetLastError();
         throw UnicodeConversionException(
             errorCode,
-            UnicodeConversionException::ConversionType::FromUtf8ToUtf16,
+            UnicodeConversionException::ConversionType::ConversionFromUtf8ToUtf16,
             "Can't convert from UTF-8 to UTF-16 string (MultiByteToWideChar failed).");
     }
 
     return utf16;
 }
+
 
 } // namespace UnicodeConvStd
 

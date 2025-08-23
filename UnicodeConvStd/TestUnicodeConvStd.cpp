@@ -12,8 +12,10 @@
 #include <string>               // std::string, std::wstring
 
 
+//------------------------------------------------------------------------------
 // Convenient function to print PASSED/FAILED on a single test,
 // alongside a short description for the test
+//------------------------------------------------------------------------------
 void Check(bool condition, const char* description)
 {
     std::cout << "[" << description << "]: ";
@@ -28,16 +30,31 @@ void Check(bool condition, const char* description)
 }
 
 
+//==============================================================================
 //
 // Various Tests
 //
+//==============================================================================
 
 void TestEmptyStrings()
 {
     std::wstring utf16empty;
-    std::string utf8empty = UnicodeConvStd::ToUtf8(utf16empty);
+    std::string utf8empty = UnicodeConvStd::Utf8FromUtf16(utf16empty);
     _ASSERTE(utf8empty.empty());
-    Check(utf8empty.empty(), "Empty strings");
+    Check(utf8empty.empty(), "Empty UTF-8 string from empty UTF-16 string");
+
+    utf8empty = UnicodeConvStd::Utf8FromUtf16(L"");
+    _ASSERTE(utf8empty.empty());
+    Check(utf8empty.empty(), "Empty UTF-8 string from empty string literal");
+
+    utf8empty = "";
+    utf16empty = UnicodeConvStd::Utf16FromUtf8(utf8empty);
+    _ASSERTE(utf16empty.empty());
+    Check(utf16empty.empty(), "Empty UTF-16 string from empty UTF-8 string");
+
+    utf16empty = UnicodeConvStd::Utf16FromUtf8("");
+    _ASSERTE(utf16empty.empty());
+    Check(utf16empty.empty(), "Empty UTF-16 string from empty string literal");
 }
 
 
@@ -50,8 +67,8 @@ void TestStringsWithJapaneseKanji()
     // UTF-8 encoding: 0xE5 0xAD 0xA6
 
     std::wstring utf16 = L"Japanese kanji \x5B66";
-    std::string utf8 = UnicodeConvStd::ToUtf8(utf16);
-    std::wstring utf16Again = UnicodeConvStd::ToUtf16(utf8);
+    std::string utf8 = UnicodeConvStd::Utf8FromUtf16(utf16);
+    std::wstring utf16Again = UnicodeConvStd::Utf16FromUtf8(utf8);
     _ASSERTE(utf16 == utf16Again);
     Check(utf16 == utf16Again, "String with Japanese kanji");
 }
@@ -68,7 +85,7 @@ void TestStringLengths()
     std::wstring utf16 = L"\x5B66";
     _ASSERTE(utf16.length() == 1); // 1 wchar_t in UTF-16
 
-    std::string utf8 = UnicodeConvStd::ToUtf8(utf16);
+    std::string utf8 = UnicodeConvStd::Utf8FromUtf16(utf16);
     _ASSERTE(utf8.length() == 3); // 3 chars when encoded in UTF-8
     Check(utf8.length() == 3, "UTF-8 length");
     _ASSERTE(strlen(utf8.c_str()) == 3);
@@ -94,7 +111,7 @@ void TestUnicodeConversions()
 
 int main()
 {
-    // Run the tests
+    // Run all the tests
     TestUnicodeConversions();
 }
 
