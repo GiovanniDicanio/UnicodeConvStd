@@ -23,7 +23,7 @@ The exported functions are:
     std::string Utf8FromUtf16(std::wstring_view utf16)
     
     // Convert from UTF-8 to UTF-16
-    std::wstring Utf16FromUtf8(std::string utf8)
+    std::wstring Utf16FromUtf8(std::string_view utf8)
 ```
 
 For these functions, I used the *ResultFromSource* coding convention.
