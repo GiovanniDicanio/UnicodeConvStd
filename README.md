@@ -26,11 +26,6 @@ The exported functions are:
     std::wstring Utf16FromUtf8(std::string_view utf8)
 ```
 
-For these functions, I used the *ResultFromSource* coding convention.
-In this way, the return value is put on the left, and the argument on the right,
-like in: `result = Conversion(source)`.
-
-
 These functions live under the `UnicodeConvStd` namespace.
 
 This code compiles cleanly at warning level 4 (`/W4`)
