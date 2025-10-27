@@ -11,7 +11,7 @@
 //                    <giovanni.dicanio AT gmail.com>
 //
 //
-// Last Update: 2025, August 23
+// Last Update: 2025, October 27th
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -158,7 +158,7 @@ private:
 };
 
 
-namespace details
+namespace detail
 {
 
 //------------------------------------------------------------------------------
@@ -178,7 +178,7 @@ inline [[nodiscard]] int SafeIntFromSizet(size_t s)
     return static_cast<DestinationType>(s);
 }
 
-} // namespace details
+} // namespace detail
 
 
 inline std::string Utf8FromUtf16(std::wstring_view utf16)
@@ -193,7 +193,7 @@ inline std::string Utf8FromUtf16(std::wstring_view utf16)
     // Safely fail if an invalid UTF-16 character sequence is encountered
     constexpr DWORD kFlags = WC_ERR_INVALID_CHARS;
 
-    const int utf16Length = details::SafeIntFromSizet(utf16.length());
+    const int utf16Length = detail::SafeIntFromSizet(utf16.length());
 
     // Get the length, in chars, of the resulting UTF-8 string
     const int utf8Length = ::WideCharToMultiByte(
@@ -216,7 +216,7 @@ inline std::string Utf8FromUtf16(std::wstring_view utf16)
     }
 
     // Make room in the destination string for the converted bits
-    std::string utf8(utf8Length, ' ');
+    std::string utf8(utf8Length, '\0');
     char* utf8Buffer = utf8.data();
     _ASSERTE(utf8Buffer != nullptr);
 
@@ -256,7 +256,7 @@ inline std::wstring Utf16FromUtf8(std::string_view utf8)
     // Safely fail if an invalid UTF-8 character sequence is encountered
     constexpr DWORD kFlags = MB_ERR_INVALID_CHARS;
 
-    const int utf8Length = details::SafeIntFromSizet(utf8.length());
+    const int utf8Length = detail::SafeIntFromSizet(utf8.length());
 
     // Get the size of the destination UTF-16 string
     const int utf16Length = ::MultiByteToWideChar(
@@ -278,7 +278,7 @@ inline std::wstring Utf16FromUtf8(std::string_view utf8)
     }
 
     // Make room in the destination string for the converted bits
-    std::wstring utf16(utf16Length, L' ');
+    std::wstring utf16(utf16Length, L'\0');
     wchar_t* utf16Buffer = utf16.data();
     _ASSERTE(utf16Buffer != nullptr);
 
@@ -309,3 +309,4 @@ inline std::wstring Utf16FromUtf8(std::string_view utf8)
 
 
 #endif // GIOVANNI_DICANIO_UNICODECONVSTD_HPP_INCLUDED
+
