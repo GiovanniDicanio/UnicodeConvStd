@@ -19,11 +19,11 @@ Input strings are represented using string views, in particular:
 The exported functions are:
 
 ```cpp
-    // Convert from UTF-16 to UTF-8
-    std::string Utf8FromUtf16(std::wstring_view utf16)
+// Convert from UTF-16 to UTF-8
+std::string Utf8FromUtf16(std::wstring_view utf16)
     
-    // Convert from UTF-8 to UTF-16
-    std::wstring Utf16FromUtf8(std::string_view utf8)
+// Convert from UTF-8 to UTF-16
+std::wstring Utf16FromUtf8(std::string_view utf8)
 ```
 
 These functions live under the `UnicodeConvStd` namespace.
@@ -33,3 +33,7 @@ on both 32-bit and 64-bit builds, with Visual Studio 2019 in C++17 mode.
 
 Just `#include` [**`"UnicodeConvStd.hpp"`**](UnicodeConvStd/UnicodeConvStd.hpp) in your projects, 
 and enjoy!
+
+Related **blog posts**:
+- https://giodicanio.com/2025/10/27/converting-between-unicode-utf-16-and-utf-8-in-windows-c-plus-plus-code/
+- https://giodicanio.com/2023/10/03/converting-between-unicode-utf-16-and-utf-8-using-c-plus-plus-standard-library-strings-and-direct-win32-api-calls/
