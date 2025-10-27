@@ -1,4 +1,4 @@
-# UnicodeConvStd v2.0.0
+# UnicodeConvStd v2.0.1
 Convenient easy-to-use and efficient helper functions to convert between Unicode UTF-16 and UTF-8 
 using `std::wstring` and `std::string` (and their respective "string views").
 
